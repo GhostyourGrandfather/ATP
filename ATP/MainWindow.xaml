@@ -1,0 +1,527 @@
+﻿<Window x:Class="ATP.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ATP"
+        mc:Ignorable="d"
+        Title="Информационная система АТП" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#FFF0F0F0">
+
+    <Window.Resources>
+        <!-- Общие стили -->
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF333333"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+        </Style>
+
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FF333333"/>
+            <Setter Property="Margin" Value="0,5,0,2"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Background" Value="#FF4285F4"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF3367D6"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FF2A56B7"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFDDDDDD"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Background" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FFDDDDDD"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#FF333333"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="BorderThickness" Value="1,1,1,0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFDDDDDD"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#FFF5F5F5"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#FF4285F4"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0,0,0,0"/>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+
+        <Style TargetType="StatusBar">
+            <Setter Property="Background" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FFDDDDDD"/>
+            <Setter Property="BorderThickness" Value="1,0,0,0"/>
+            <Setter Property="Padding" Value="10,5"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Border Grid.Row="0" Background="#FF4285F4" Padding="15">
+            <TextBlock Text="Информационная система АТП" 
+                       Foreground="White" 
+                       FontSize="18" 
+                       FontWeight="Bold"/>
+        </Border>
+
+        <TabControl Grid.Row="1">
+            <!-- Управление транспортом -->
+            <TabItem Header="Управление транспортом">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <TextBlock Text="Добавить новый транспорт" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"/>
+
+                        <Border Background="White" 
+                                BorderBrush="#FFDDDDDD" 
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="15"
+                                Margin="0,10,0,20">
+                            <StackPanel>
+                                <Label Content="Марка:"/>
+                                <TextBox x:Name="BrandTextBox"/>
+                                <Label Content="Модель:"/>
+                                <TextBox x:Name="ModelTextBox"/>
+                                <Label Content="Год:"/>
+                                <TextBox x:Name="YearTextBox"/>
+                                <Label Content="Номер:"/>
+                                <TextBox x:Name="NumberTextBox"/>
+                                <Button Content="Добавить транспорт" 
+                                        Margin="5,15,5,5"
+                                        Width="200"
+                                        HorizontalAlignment="Left"
+                                        Click="AddVehicle_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Список транспортных средств" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"/>
+
+                        <DataGrid x:Name="VehiclesDataGrid" AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Марка" Binding="{Binding Brand}" Width="*"/>
+                                <DataGridTextColumn Header="Модель" Binding="{Binding Model}" Width="*"/>
+                                <DataGridTextColumn Header="Год" Binding="{Binding Year}" Width="0.5*"/>
+                                <DataGridTextColumn Header="Номер" Binding="{Binding Number}" Width="*"/>
+                                <DataGridTemplateColumn Header="Действия" Width="0.5*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Удалить" 
+                                                    CommandParameter="{Binding Id}"
+                                                    Background="#FFDB4437"
+                                                    Margin="2"
+                                                    Click="DeleteVehicle_Click">
+                                                <Button.Triggers>
+                                                    <EventTrigger RoutedEvent="MouseEnter">
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <ColorAnimation To="#FFC13525" 
+                                                                                Duration="0:0:0.1"
+                                                                                Storyboard.TargetProperty="Background.Color"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </EventTrigger>
+                                                </Button.Triggers>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Управление водителями -->
+            <TabItem Header="Управление водителями">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <TextBlock Text="Добавить водителя" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"/>
+
+                        <Border Background="White" 
+                                BorderBrush="#FFDDDDDD" 
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="15"
+                                Margin="0,10,0,20">
+                            <StackPanel>
+                                <Label Content="ФИО:"/>
+                                <TextBox x:Name="NameTextBox"/>
+                                <Label Content="Стаж:"/>
+                                <TextBox x:Name="ExperienceTextBox"/>
+                                <Label Content="Номер прав:"/>
+                                <TextBox x:Name="LicenseNumberTextBox"/>
+                                <Button Content="Добавить водителя" 
+                                        Margin="5,15,5,5"
+                                        Width="200"
+                                        HorizontalAlignment="Left"
+                                        Click="AddDriver_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Список водителей" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"/>
+
+                        <DataGrid x:Name="DriversDataGrid" AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ФИО" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="Стаж" Binding="{Binding Experience}" Width="0.5*"/>
+                                <DataGridTextColumn Header="Номер прав" Binding="{Binding LicenseNumber}" Width="*"/>
+                                <DataGridTemplateColumn Header="Действия" Width="0.5*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Удалить" 
+                                                    CommandParameter="{Binding Id}"
+                                                    Background="#FFDB4437"
+                                                    Margin="2"
+                                                    Click="DeleteDriver_Click">
+                                                <Button.Triggers>
+                                                    <EventTrigger RoutedEvent="MouseEnter">
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <ColorAnimation To="#FFC13525" 
+                                                                                Duration="0:0:0.1"
+                                                                                Storyboard.TargetProperty="Background.Color"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </EventTrigger>
+                                                </Button.Triggers>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Маршрутизация -->
+            <TabItem Header="Маршрутизация" Loaded="RoutingTab_Loaded">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <TextBlock Text="Создание маршрута" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"/>
+
+                        <Border Background="White" 
+                                BorderBrush="#FFDDDDDD" 
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="15"
+                                Margin="0,10,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Label Content="Начальная точка:" Grid.Row="0" Grid.Column="0"/>
+                                <TextBox x:Name="StartPointTextBox" Grid.Row="1" Grid.Column="0" Margin="0,0,10,10"/>
+
+                                <Label Content="Конечная точка:" Grid.Row="0" Grid.Column="1"/>
+                                <TextBox x:Name="EndPointTextBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10"/>
+
+                                <Label Content="Расстояние (км):" Grid.Row="2" Grid.Column="0"/>
+                                <TextBox x:Name="DistanceTextBox" Grid.Row="3" Grid.Column="0" Margin="0,0,10,10"/>
+
+                                <Label Content="Время в пути (ч):" Grid.Row="2" Grid.Column="1"/>
+                                <TextBox x:Name="TravelTimeTextBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,10"/>
+
+                                <Label Content="Водитель:" Grid.Row="4" Grid.Column="0"/>
+                                <ComboBox x:Name="DriverComboBox" Grid.Row="5" Grid.Column="0" Margin="0,0,10,0"
+                                          DisplayMemberPath="Name"/>
+
+                                <Label Content="Транспорт:" Grid.Row="4" Grid.Column="1"/>
+                                <ComboBox x:Name="VehicleComboBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,0"
+                                          DisplayMemberPath="Brand"/>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,20">
+                            <Button Content="Добавить маршрут" 
+                                    Width="150"
+                                    Margin="0,0,10,0"
+                                    Click="AddRoute_Click"/>
+                            <Button Content="Рассчитать оптимальный маршрут" 
+                                    Width="250"
+                                    Background="#FF0F9D58"
+                                    Click="CalculateOptimalRoute_Click"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Список маршрутов" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"/>
+
+                        <DataGrid x:Name="RoutesDataGrid" AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Маршрут" Width="*">
+                                    <DataGridTextColumn.Binding>
+                                        <MultiBinding StringFormat="{}{0} → {1}">
+                                            <Binding Path="StartPoint"/>
+                                            <Binding Path="EndPoint"/>
+                                        </MultiBinding>
+                                    </DataGridTextColumn.Binding>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Расстояние (км)" Binding="{Binding Distance}" Width="0.7*"/>
+                                <DataGridTextColumn Header="Время (ч)" Binding="{Binding TravelTime}" Width="0.7*"/>
+                                <DataGridTextColumn Header="Водитель" Binding="{Binding Driver.Name}" Width="*"/>
+                                <DataGridTextColumn Header="Транспорт" Binding="{Binding Vehicle.Brand}" Width="*"/>
+                                <DataGridTemplateColumn Header="Действия" Width="0.7*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="Удалить" 
+                                                        CommandParameter="{Binding Id}"
+                                                        Background="#FFDB4437"
+                                                        Margin="2" Width="70"
+                                                        Click="DeleteRoute_Click"/>
+                                                <Button Content="Карта" 
+                                                        CommandParameter="{Binding Id}"
+                                                        Background="#FF0F9D58"
+                                                        Margin="2" Width="70"
+                                                        Click="ShowRouteOnMap_Click"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <TextBlock Text="Статистика маршрутов" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"
+                                   Margin="0,20,0,10"/>
+
+                        <Border Background="White" 
+                                BorderBrush="#FFDDDDDD" 
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Общее количество маршрутов:" 
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="TotalRoutesText" Text="0" 
+                                               FontSize="16" Margin="0,5,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Общий пробег (км):" 
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="TotalDistanceText" Text="0" 
+                                               FontSize="16" Margin="0,5,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Среднее время (ч):" 
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="AvgTimeText" Text="0" 
+                                               FontSize="16" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Отчеты -->
+            <TabItem Header="Отчеты">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <TextBlock Text="Генерация отчетов" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"/>
+
+                        <Border Background="White" 
+                                BorderBrush="#FFDDDDDD" 
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="15"
+                                Margin="0,10,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Label Content="Тип отчета:" Grid.Row="0" Grid.Column="0"/>
+                                <ComboBox x:Name="ReportTypeComboBox" Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
+                                    <ComboBoxItem Content="По маршрутам"/>
+                                    <ComboBoxItem Content="По водителям"/>
+                                    <ComboBoxItem Content="По транспорту"/>
+                                    <ComboBoxItem Content="Финансовый"/>
+                                </ComboBox>
+
+                                <Label Content="Период:" Grid.Row="0" Grid.Column="1"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                    <DatePicker x:Name="StartDatePicker" Width="120" Margin="0,0,10,10"/>
+                                    <TextBlock Text="—" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                                    <DatePicker x:Name="EndDatePicker" Width="120" Margin="0,0,0,10"/>
+                                </StackPanel>
+
+                                <Button Content="Сформировать отчет" 
+                                        Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                        HorizontalAlignment="Left"
+                                        Width="200"
+                                        Margin="0,10,0,0"
+                                        Click="GenerateReport_Click"/>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Просмотр отчетов" 
+                                   FontWeight="Bold" 
+                                   FontSize="16"
+                                   Foreground="#FF4285F4"/>
+
+                        <TabControl Margin="0,10,0,0" BorderThickness="0">
+                            <TabItem Header="Таблица">
+                                <DataGrid x:Name="ReportsDataGrid" AutoGenerateColumns="True"/>
+                            </TabItem>
+                            <TabItem Header="Графики">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Margin="5" BorderBrush="#FFDDDDDD" BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="Распределение маршрутов" 
+                                                       HorizontalAlignment="Center"
+                                                       Margin="0,10,0,5"
+                                                       FontWeight="SemiBold"/>
+                                            <Image  Stretch="Uniform" Height="200"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Column="1" Margin="5" BorderBrush="#FFDDDDDD" BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="Загрузка транспорта" 
+                                                       HorizontalAlignment="Center"
+                                                       Margin="0,10,0,5"
+                                                       FontWeight="SemiBold"/>
+                                            <Image  Stretch="Uniform" Height="200"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </TabItem>
+                        </TabControl>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                            <Button Content="Экспорт в Excel" 
+                                    Width="150"
+                                    Margin="0,0,10,0"
+                                    Background="#FF0F9D58"
+                                    Click="ExportToExcel_Click"/>
+                            <Button Content="Печать" 
+                                    Width="100"
+                                    Background="#FF4285F4"
+                                    Click="PrintReport_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock Text="© 2024 Информационная система АТП. Все права защищены." 
+                           Foreground="#FF666666"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock x:Name="StatusText" Text="Готов" 
+                           Margin="10,0,0,0"
+                           Foreground="#FF4285F4"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
