@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows;
@@ -8,313 +9,89 @@ namespace ATP
 {
     public partial class DriverWindow : Window
     {
-        private string connectionString = "Data Source=(local);Initial Catalog=ATP_Management;Integrated Security=True";
-        private int currentDriverId;
+        private int _driverId;
+        private List<Route> _routes;
+        private Vehicle _assignedVehicle;
 
         public DriverWindow(int driverId)
         {
+            _driverId = driverId;
+            InitializeMockData();
             InitializeComponent();
-            currentDriverId = driverId;
-            LoadDriverData();
-            LoadRoutes();
-            LoadVehicleInfo();
+            LoadData();
         }
 
-        private void DriverWindow_Loaded(object sender, RoutedEventArgs e)
+        private void InitializeMockData()
         {
-            try
+            _assignedVehicle = new Vehicle
             {
-                LoadDriverData();
-                LoadRoutes();
-                LoadVehicleInfo();
-                StatusText.Text = "Данные загружены";
-            }
-            catch (Exception ex)
+                Id = 1,
+                Brand = "ГАЗ",
+                Model = "ГАЗель NEXT",
+                Year = 2022,
+                Number = "А123БВ777"
+            };
+
+            _routes = new List<Route>
             {
-                StatusText.Text = "Ошибка загрузки данных";
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                new Route
+                {
+                    Id = 1,
+                    StartPoint = "Москва",
+                    EndPoint = "Санкт-Петербург",
+                    Distance = 700,
+                    Status = "В процессе",
+                    Vehicle = _assignedVehicle
+                },
+                new Route
+                {
+                    Id = 2,
+                    StartPoint = "Москва",
+                    EndPoint = "Казань",
+                    Distance = 800,
+                    Status = "Завершен",
+                    Vehicle = _assignedVehicle
+                }
+            };
         }
 
-        private void LoadDriverStatistics()
+        private void LoadData()
         {
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = @"
-                SELECT 
-                    COUNT(*) AS TotalCompletedRoutes,
-                    SUM(Distance) AS TotalDistance,
-                    AVG(Rating) AS AvgRating
-                FROM Routes
-                WHERE DriverId = @DriverId AND IsCompleted = 1";
+            CurrentRoutesDataGrid.ItemsSource = _routes;
+            RouteHistoryDataGrid.ItemsSource = _routes.FindAll(r => r.Status == "Завершен");
 
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@DriverId", currentDriverId);
+            VehicleBrandText.Text = _assignedVehicle.Brand;
+            VehicleModelText.Text = _assignedVehicle.Model;
+            VehicleYearText.Text = _assignedVehicle.Year.ToString();
+            VehicleNumberText.Text = _assignedVehicle.Number;
 
-                    SqlDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        TotalRoutesText.Text = reader["TotalCompletedRoutes"].ToString();
-                        TotalDistanceText.Text = reader["TotalDistance"].ToString();
-                        AvgRatingText.Text = reader["AvgRating"].ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при загрузке статистики: {ex.Message}", "Ошибка",
-                               MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void LoadRecentRoutes()
-        {
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = @"
-                SELECT TOP 10
-                    r.StartPoint + ' → ' + r.EndPoint AS Route,
-                    r.Distance,
-                    FORMAT(r.CreatedAt, 'dd.MM.yyyy') AS RouteDate,
-                    v.Brand + ' ' + v.Model AS Vehicle,
-                    CASE WHEN r.IsCompleted = 1 THEN 'Завершен' ELSE 'В процессе' END AS Status
-                FROM Routes r
-                JOIN Vehicles v ON r.VehicleId = v.Id
-                WHERE r.DriverId = @DriverId
-                ORDER BY r.CreatedAt DESC";
-
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@DriverId", currentDriverId);
-
-                    SqlDataAdapter adapter = new SqlDataAdapter(command);
-                    DataTable dt = new DataTable();
-                    adapter.Fill(dt);
-
-                    RouteHistoryDataGrid.ItemsSource = dt.DefaultView;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при загрузке истории маршрутов: {ex.Message}", "Ошибка",
-                               MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void LoadDriverData()
-        {
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = "SELECT Name FROM Drivers WHERE Id = @DriverId";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@DriverId", currentDriverId);
-
-                    var result = command.ExecuteScalar();
-                    if (result != null)
-                    {
-                        DriverNameText.Text = result.ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при загрузке данных водителя: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void LoadRoutes()
-        {
-            try
-            {
-                // Загрузка текущих маршрутов
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = @"
-                        SELECT 
-                            r.Id,
-                            r.StartPoint,
-                            r.EndPoint,
-                            r.Distance,
-                            v.Brand + ' ' + v.Model AS Vehicle,
-                            r.CreatedAt AS RouteDate,
-                            CASE 
-                                WHEN r.IsCompleted = 1 THEN 'Завершен'
-                                ELSE 'В процессе'
-                            END AS Status,
-                            CASE 
-                                WHEN r.IsCompleted = 1 THEN 'Green'
-                                ELSE 'Orange'
-                            END AS StatusColor
-                        FROM Routes r
-                        JOIN Vehicles v ON r.VehicleId = v.Id
-                        WHERE r.DriverId = @DriverId
-                        ORDER BY r.CreatedAt DESC";
-
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@DriverId", currentDriverId);
-
-                    SqlDataAdapter adapter = new SqlDataAdapter(command);
-                    DataTable dt = new DataTable();
-                    adapter.Fill(dt);
-
-                    CurrentRoutesDataGrid.ItemsSource = dt.DefaultView;
-                }
-
-                // Загрузка статистики
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = @"
-                        SELECT 
-                            COUNT(*) AS TotalRoutes,
-                            SUM(Distance) AS TotalDistance
-                        FROM Routes
-                        WHERE DriverId = @DriverId";
-
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@DriverId", currentDriverId);
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        TotalRoutesText.Text = reader["TotalRoutes"].ToString();
-                        TotalDistanceText.Text = reader["TotalDistance"].ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при загрузке маршрутов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void LoadVehicleInfo()
-        {
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    // Основная информация о транспорте
-                    string query = @"
-                        SELECT 
-                            v.Brand,
-                            v.Model,
-                            v.Year,
-                            v.Number
-                        FROM Vehicles v
-                        JOIN Drivers d ON v.Id = d.VehicleId
-                        WHERE d.Id = @DriverId";
-
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@DriverId", currentDriverId);
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        VehicleBrandText.Text = reader["Brand"].ToString();
-                        VehicleModelText.Text = reader["Model"].ToString();
-                        VehicleYearText.Text = reader["Year"].ToString();
-                        VehicleNumberText.Text = reader["Number"].ToString();
-                    }
-                    reader.Close();
-
-                    // Техническое состояние
-                    query = @"
-                        SELECT 
-                            Component,
-                            Condition,
-                            CheckDate,
-                            Recommendation
-                        FROM VehicleChecks
-                        WHERE VehicleId = (SELECT VehicleId FROM Drivers WHERE Id = @DriverId)
-                        ORDER BY CheckDate DESC";
-
-                    command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@DriverId", currentDriverId);
-
-                    SqlDataAdapter adapter = new SqlDataAdapter(command);
-                    DataTable dt = new DataTable();
-                    adapter.Fill(dt);
-
-                    VehicleStatusDataGrid.ItemsSource = dt.DefaultView;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при загрузке информации о транспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            TotalRoutesText.Text = _routes.Count.ToString();
+            TotalDistanceText.Text = _routes.Sum(r => r.Distance).ToString();
         }
 
         private void StartRoute_Click(object sender, RoutedEventArgs e)
         {
-            Button button = sender as Button;
-            int routeId = (int)button.CommandParameter;
-
-            try
+            if (CurrentRoutesDataGrid.SelectedItem is Route route)
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = "UPDATE Routes SET IsStarted = 1 WHERE Id = @RouteId";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@RouteId", routeId);
-                    command.ExecuteNonQuery();
-                }
-
-                LoadRoutes();
-                StatusText.Text = "Маршрут начат";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при начале маршрута: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                route.Status = "В процессе";
+                CurrentRoutesDataGrid.Items.Refresh();
             }
         }
 
         private void CompleteRoute_Click(object sender, RoutedEventArgs e)
         {
-            Button button = sender as Button;
-            int routeId = (int)button.CommandParameter;
-
-            try
+            if (CurrentRoutesDataGrid.SelectedItem is Route route)
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = "UPDATE Routes SET IsCompleted = 1, CompletedDate = GETDATE() WHERE Id = @RouteId";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@RouteId", routeId);
-                    command.ExecuteNonQuery();
-                }
-
-                LoadRoutes();
-                StatusText.Text = "Маршрут завершен";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при завершении маршрута: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                route.Status = "Завершен";
+                CurrentRoutesDataGrid.Items.Refresh();
+                RouteHistoryDataGrid.Items.Refresh();
             }
         }
 
-        private void ReportProblem_Click(object sender, RoutedEventArgs e)
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            // Здесь можно реализовать форму для отправки сообщения о проблеме
-            MessageBox.Show("Форма сообщения о проблеме", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Дополнительная загрузка данных при необходимости
+            new LoginWindow().Show();
+            this.Close();
         }
     }
 }

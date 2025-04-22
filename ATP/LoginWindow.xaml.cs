@@ -7,34 +7,26 @@ namespace ATP
 {
     public partial class LoginWindow : Window
     {
-        private const string ConnectionString = "Data Source=(local);Initial Catalog=ATP_Management;Integrated Security=True";
+        // Мок-данные пользователей
+        private class User
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+            public string Name { get; set; }
+            public string Role { get; set; }
+            public int Id { get; set; }
+        }
+
+        private readonly User[] _users = new[]
+        {
+            new User { Id = 1, Username = "admin", Password = "admin123", Name = "Администратор", Role = "admin" },
+            new User { Id = 2, Username = "driver1", Password = "driver123", Name = "Иванов И.И.", Role = "driver" },
+            new User { Id = 3, Username = "driver2", Password = "driver456", Name = "Петров П.П.", Role = "driver" }
+        };
 
         public LoginWindow()
         {
             InitializeComponent();
-            LoadSavedCredentials();
-        }
-
-        private void LoadSavedCredentials()
-        {
-            // Загрузка сохраненных учетных данных (если есть)
-            UsernameTextBox.Text = Properties.Settings.Default.SavedUsername ?? "";
-            RememberCheckBox.IsChecked = Properties.Settings.Default.RememberMe;
-        }
-
-        private void SaveCredentials()
-        {
-            if (RememberCheckBox.IsChecked == true)
-            {
-                Properties.Settings.Default.SavedUsername = UsernameTextBox.Text;
-                Properties.Settings.Default.RememberMe = true;
-            }
-            else
-            {
-                Properties.Settings.Default.SavedUsername = "";
-                Properties.Settings.Default.RememberMe = false;
-            }
-            Properties.Settings.Default.Save();
         }
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
@@ -48,66 +40,45 @@ namespace ATP
                 return;
             }
 
-            try
+            User foundUser = null;
+            foreach (var user in _users)
             {
-                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                if (user.Username == username && user.Password == password)
                 {
-                    connection.Open();
-                    string query = @"
-                        SELECT Id, Name, Role 
-                        FROM Users 
-                        WHERE Username = @Username AND Password = @Password";
-
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@Username", username);
-                    command.Parameters.AddWithValue("@Password", password);
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int userId = reader.GetInt32(0);
-                            string name = reader.GetString(1);
-                            string role = reader.GetString(2);
-
-                            SaveCredentials();
-
-                            OpenAppropriateWindow(userId, name, role);
-                        }
-                        else
-                        {
-                            StatusText.Text = "Неверный логин или пароль";
-                        }
-                    }
+                    foundUser = user;
+                    break;
                 }
             }
-            catch (Exception ex)
+
+            if (foundUser != null)
             {
-                StatusText.Text = "Ошибка подключения к базе данных";
-                MessageBox.Show($"Ошибка авторизации: {ex.Message}", "Ошибка", 
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                OpenAppropriateWindow(foundUser);
+            }
+            else
+            {
+                StatusText.Text = "Неверный логин или пароль";
             }
         }
 
-        private void OpenAppropriateWindow(int userId, string name, string role)
+        private void OpenAppropriateWindow(User user)
         {
-            switch (role.ToLower())
+            Window nextWindow = user.Role.ToLower() switch
             {
-                case "admin":
-                    MainWindow adminWindow = new MainWindow();
-                    adminWindow.Show();
-                    break;
-                case "driver":
-                    DriverWindow driverWindow = new DriverWindow(userId);
-                    driverWindow.Show();
-                    break;
-                default:
-                    MessageBox.Show("Неизвестная роль пользователя", "Ошибка", 
-                                  MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-            }
+                "admin" => new MainWindow(),
+                "driver" => new DriverWindow(user.Id),
+                _ => null
+            };
 
-            this.Close();
+            if (nextWindow != null)
+            {
+                nextWindow.Show();
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Неизвестная роль пользователя", "Ошибка",
+                              MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

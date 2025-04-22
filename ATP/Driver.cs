@@ -12,7 +12,5 @@ namespace ATP
         public string Name { get; set; }
         public int Experience { get; set; }
         public string LicenseNumber { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public bool IsActive { get; set; }
     }
 }

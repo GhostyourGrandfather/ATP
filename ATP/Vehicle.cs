@@ -13,7 +13,5 @@ namespace ATP
         public string Model { get; set; }
         public int Year { get; set; }
         public string Number { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public bool IsActive { get; set; }
     }
 }

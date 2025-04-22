@@ -13,13 +13,8 @@ namespace ATP
         public string EndPoint { get; set; }
         public decimal Distance { get; set; }
         public decimal TravelTime { get; set; }
-        public int DriverId { get; set; }
-        public int VehicleId { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public bool IsCompleted { get; set; }
-
-        // Навигационные свойства
         public Driver Driver { get; set; }
         public Vehicle Vehicle { get; set; }
+        public string Status { get; set; } = "Назначен";
     }
 }
