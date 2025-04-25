@@ -108,6 +108,12 @@
             <Setter Property="BorderThickness" Value="1,0,0,0"/>
             <Setter Property="Padding" Value="10,5"/>
         </Style>
+        <Style TargetType="Button" x:Key="LogoutButtonStyle">
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Background" Value="#FFDB4437"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -123,6 +129,9 @@
                        FontSize="18" 
                        FontWeight="Bold"/>
         </Border>
+        <Button Content="Выход" Grid.Row="0" HorizontalAlignment="Right" 
+            Style="{StaticResource LogoutButtonStyle}"
+            Click="LogoutButton_Click"/>
 
         <TabControl Grid.Row="1">
             <!-- Управление транспортом -->
@@ -309,11 +318,13 @@
 
                                 <Label Content="Водитель:" Grid.Row="4" Grid.Column="0"/>
                                 <ComboBox x:Name="DriverComboBox" Grid.Row="5" Grid.Column="0" Margin="0,0,10,0"
-                                          DisplayMemberPath="Name"/>
-
+                                  DisplayMemberPath="Name"
+                                  ItemsSource="{Binding}"/>
                                 <Label Content="Транспорт:" Grid.Row="4" Grid.Column="1"/>
+
                                 <ComboBox x:Name="VehicleComboBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,0"
-                                          DisplayMemberPath="Brand"/>
+                                  DisplayMemberPath="Brand"
+                                  ItemsSource="{Binding}"/>
                             </Grid>
                         </Border>
 
@@ -333,7 +344,8 @@
                                    FontSize="16"
                                    Foreground="#FF4285F4"/>
 
-                        <DataGrid x:Name="RoutesDataGrid" AutoGenerateColumns="False">
+                        <DataGrid x:Name="RoutesDataGrid" AutoGenerateColumns="False" 
+          ItemsSource="{Binding}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Маршрут" Width="*">
                                     <DataGridTextColumn.Binding>

@@ -38,7 +38,7 @@ namespace ATP
 
         private void AddVehicle_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(BrandTextBox.Text) return;
+            if (string.IsNullOrWhiteSpace(BrandTextBox.Text) )return;
 
             var newVehicle = new Vehicle
             {
