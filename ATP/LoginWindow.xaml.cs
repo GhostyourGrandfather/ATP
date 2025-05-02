@@ -1,14 +1,10 @@
-﻿using System;
-using System.Data.SqlClient;
-using System.Windows;
-using ATP.Properties;
+﻿using System.Windows;
 
 namespace ATP
 {
     public partial class LoginWindow : Window
     {
-        // Мок-данные пользователей
-        private class User
+        public class User
         {
             public string Username { get; set; }
             public string Password { get; set; }
@@ -62,12 +58,20 @@ namespace ATP
 
         private void OpenAppropriateWindow(User user)
         {
-            Window nextWindow = user.Role.ToLower() switch
+            Window nextWindow;
+
+            switch (user.Role.ToLower())
             {
-                "admin" => new MainWindow(),
-                "driver" => new DriverWindow(user.Id),
-                _ => null
-            };
+                case "admin":
+                    nextWindow = new MainWindow();
+                    break;
+                case "driver":
+                    nextWindow = new DriverWindow(user.Id);
+                    break;
+                default:
+                    nextWindow = null;
+                    break;
+            }
 
             if (nextWindow != null)
             {
@@ -79,6 +83,11 @@ namespace ATP
                 MessageBox.Show("Неизвестная роль пользователя", "Ошибка",
                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void ExitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }

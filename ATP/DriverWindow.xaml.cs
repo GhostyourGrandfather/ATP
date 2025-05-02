@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Windows;
 using System.Windows.Controls;
+using System.Linq;
 
 namespace ATP
 {
@@ -66,7 +67,7 @@ namespace ATP
             VehicleNumberText.Text = _assignedVehicle.Number;
 
             TotalRoutesText.Text = _routes.Count.ToString();
-            TotalDistanceText.Text = _routes.Sum(r => r.Distance).ToString();
+            TotalDistanceText.Text = _routes.Where(r => r.Distance > 0).Sum(r => r.Distance).ToString("N0");
         }
 
         private void StartRoute_Click(object sender, RoutedEventArgs e)
@@ -94,5 +95,14 @@ namespace ATP
             this.Close();
         }
 
+        private void ReportProblem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DriverWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

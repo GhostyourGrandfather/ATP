@@ -16,5 +16,6 @@ namespace ATP
         public Driver Driver { get; set; }
         public Vehicle Vehicle { get; set; }
         public string Status { get; set; } = "Назначен";
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }
