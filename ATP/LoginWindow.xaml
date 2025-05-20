@@ -3,14 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
+        xmlns:local="clr-namespace:ATP"
+    mc:Ignorable="d"
         Title="Авторизация - Информационная система АТП" 
-        Height="350" Width="400"
+        Height="400" Width="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="#FFF0F0F0">
 
     <Window.Resources>
+        <local:StatusToEnabledConverter x:Key="StatusToEnabledConverter"/>
+        <local:InverseStatusConverter x:Key="InverseStatusConverter"/>
+
         <Style TargetType="TextBox">
             <Setter Property="Margin" Value="0,5,0,15"/>
             <Setter Property="Padding" Value="5"/>
@@ -34,7 +38,7 @@
 
     <Grid>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
-            <Image  Height="60" Margin="0,0,0,20"/>
+            <Image Height="60" Margin="0,0,0,20"/>
 
             <Label Content="Логин:"/>
             <TextBox x:Name="UsernameTextBox" />
@@ -46,11 +50,10 @@
 
             <Button Content="Войти" Click="LoginButton_Click" Height="40"/>
             <Button Content="Выход" Margin="0,10,0,0" Height="40" Background="#FFDB4437"
-            Click="ExitButton_Click"/>
+                    Click="ExitButton_Click"/>
 
             <TextBlock x:Name="StatusText" Foreground="Red" Margin="0,15,0,0" 
                        TextWrapping="Wrap" HorizontalAlignment="Center"/>
         </StackPanel>
-        
     </Grid>
 </Window>
