@@ -276,7 +276,7 @@
             </TabItem>
 
             <!-- Маршрутизация -->
-            <TabItem Header="Маршрутизация" Loaded="RoutingTab_Loaded">
+            <TabItem Header="Маршрутизация" Loaded="RoutingTab_Loaded" HorizontalAlignment="Left" Width="113" Height="28" Margin="-2,-2,0,0" VerticalAlignment="Top">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="15">
                         <TextBlock Text="Создание маршрута" 
