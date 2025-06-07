@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Windows;
 
 namespace ATP
@@ -7,91 +9,66 @@ namespace ATP
     public partial class DriverWindow : Window
     {
         private int _driverId;
-        private List<Vehicle> _vehicles;
-        private List<Route> _routes;
-        private Driver _currentDriver;
-
-        public class Vehicle
-        {
-            public int Id { get; set; }
-            public string Brand { get; set; }
-            public string Model { get; set; }
-            public string Number { get; set; }
-        }
-
-        public class Driver
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public string LicenseNumber { get; set; }
-        }
-
-        public class Route
-        {
-            public int Id { get; set; }
-            public string StartPoint { get; set; }
-            public string EndPoint { get; set; }
-            public decimal Distance { get; set; }
-            public string Status { get; set; }
-            public Driver Driver { get; set; }
-            public Vehicle Vehicle { get; set; }
-        }
+        private DataTable _routesTable;
 
         public DriverWindow(int driverId)
         {
-            // Важно: InitializeComponent() должен быть первым!
             InitializeComponent();
-
             _driverId = driverId;
-            InitializeMockData();
             LoadDriverData();
-
-            this.Title = $"АТП - Водитель: {_currentDriver?.Name}";
-        }
-
-        private void InitializeMockData()
-        {
-            // Мок-данные для водителя
-            _currentDriver = new Driver
-            {
-                Id = _driverId,
-                Name = "Иванов И.И.",
-                LicenseNumber = "AB123456"
-            };
-
-            // Мок-данные для транспорта
-            _vehicles = new List<Vehicle>
-            {
-                new Vehicle { Id = 1, Brand = "ГАЗ", Model = "ГАЗель NEXT", Number = "А123БВ777" }
-            };
-
-            // Мок-данные для маршрутов
-            _routes = new List<Route>
-            {
-                new Route
-                {
-                    Id = 1,
-                    StartPoint = "Москва",
-                    EndPoint = "Санкт-Петербург",
-                    Distance = 700,
-                    Status = "Назначен",
-                    Driver = _currentDriver,
-                    Vehicle = _vehicles[0]
-                }
-            };
         }
 
         private void LoadDriverData()
         {
             try
             {
-                // Загрузка данных в интерфейс
-                DriverNameText.Text = _currentDriver.Name;
-                CurrentRoutesDataGrid.ItemsSource = _routes;
+                using (SqlConnection connection = new SqlConnection(App.ConnectionString))
+                {
+                    connection.Open();
 
-                // Статистика
-                TotalRoutesText.Text = _routes.Count.ToString();
-                TotalDistanceText.Text = CalculateTotalDistance().ToString();
+                    // Загрузка информации о водителе
+                    string driverQuery = "SELECT Name FROM Drivers WHERE Id = @DriverId";
+                    using (SqlCommand driverCommand = new SqlCommand(driverQuery, connection))
+                    {
+                        driverCommand.Parameters.AddWithValue("@DriverId", _driverId);
+                        string driverName = driverCommand.ExecuteScalar()?.ToString();
+                        DriverNameText.Text = driverName;
+                        this.Title = $"АТП - Водитель: {driverName}";
+                    }
+
+                    // Загрузка маршрутов водителя
+                    string routesQuery = @"SELECT Id, StartPoint, EndPoint, Distance, Status 
+                                         FROM Routes 
+                                         WHERE DriverId = @DriverId";
+                    _routesTable = new DataTable();
+                    using (SqlCommand routesCommand = new SqlCommand(routesQuery, connection))
+                    {
+                        routesCommand.Parameters.AddWithValue("@DriverId", _driverId);
+                        SqlDataAdapter adapter = new SqlDataAdapter(routesCommand);
+                        adapter.Fill(_routesTable);
+                        CurrentRoutesDataGrid.ItemsSource = _routesTable.DefaultView;
+                    }
+
+                    // Загрузка статистики
+                    string statsQuery = @"SELECT COUNT(*) AS TotalRoutes, SUM(Distance) AS TotalDistance 
+                                        FROM Routes 
+                                        WHERE DriverId = @DriverId";
+                    using (SqlCommand statsCommand = new SqlCommand(statsQuery, connection))
+                    {
+                        statsCommand.Parameters.AddWithValue("@DriverId", _driverId);
+                        using (SqlDataReader reader = statsCommand.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                TotalRoutesText.Text = reader["TotalRoutes"].ToString();
+                                TotalDistanceText.Text = reader["TotalDistance"].ToString();
+                            }
+                        }
+                    }
+
+                    // Загрузка информации о транспорте
+                    LoadVehicleInfo(connection);
+                }
             }
             catch (Exception ex)
             {
@@ -100,45 +77,84 @@ namespace ATP
             }
         }
 
-        private decimal CalculateTotalDistance()
+        private void LoadVehicleInfo(SqlConnection connection)
         {
-            decimal total = 0;
-            foreach (var route in _routes)
+            string vehicleQuery = @"SELECT v.Brand, v.Model, v.Year, v.Number 
+                                   FROM Vehicles v
+                                   JOIN Drivers d ON v.Id = d.VehicleId
+                                   WHERE d.Id = @DriverId";
+
+            using (SqlCommand vehicleCommand = new SqlCommand(vehicleQuery, connection))
             {
-                total += route.Distance;
+                vehicleCommand.Parameters.AddWithValue("@DriverId", _driverId);
+                using (SqlDataReader reader = vehicleCommand.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        VehicleBrandText.Text = reader["Brand"].ToString();
+                        VehicleModelText.Text = reader["Model"].ToString();
+                        VehicleYearText.Text = reader["Year"].ToString();
+                        VehicleNumberText.Text = reader["Number"].ToString();
+                    }
+                }
             }
-            return total;
+
+            string statusQuery = @"SELECT Component, Condition, CheckDate, Recommendation 
+                                 FROM VehicleStatus 
+                                 WHERE VehicleId IN (SELECT VehicleId FROM Drivers WHERE Id = @DriverId)";
+            DataTable statusTable = new DataTable();
+            using (SqlCommand statusCommand = new SqlCommand(statusQuery, connection))
+            {
+                statusCommand.Parameters.AddWithValue("@DriverId", _driverId);
+                SqlDataAdapter adapter = new SqlDataAdapter(statusCommand);
+                adapter.Fill(statusTable);
+                VehicleStatusDataGrid.ItemsSource = statusTable.DefaultView;
+            }
         }
 
         private void StartRoute_Click(object sender, RoutedEventArgs e)
         {
-            if (CurrentRoutesDataGrid.SelectedItem is Route selectedRoute)
+            if (CurrentRoutesDataGrid.SelectedItem is DataRowView selectedRow)
             {
-                selectedRoute.Status = "В пути";
-                CurrentRoutesDataGrid.Items.Refresh();
+                int routeId = Convert.ToInt32(selectedRow["Id"]);
+                UpdateRouteStatus(routeId, "В пути");
             }
         }
 
         private void CompleteRoute_Click(object sender, RoutedEventArgs e)
         {
-            if (CurrentRoutesDataGrid.SelectedItem is Route selectedRoute)
+            if (CurrentRoutesDataGrid.SelectedItem is DataRowView selectedRow)
             {
-                selectedRoute.Status = "Завершен";
-                CurrentRoutesDataGrid.Items.Refresh();
-                LoadDriverData(); // Обновляем статистику
+                int routeId = Convert.ToInt32(selectedRow["Id"]);
+                UpdateRouteStatus(routeId, "Завершен");
             }
         }
 
-        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        private void UpdateRouteStatus(int routeId, string newStatus)
         {
-            var loginWindow = new LoginWindow();
-            loginWindow.Show();
-            this.Close();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(App.ConnectionString))
+                {
+                    connection.Open();
+                    string query = "UPDATE Routes SET Status = @Status WHERE Id = @RouteId";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Status", newStatus);
+                        command.Parameters.AddWithValue("@RouteId", routeId);
+                        command.ExecuteNonQuery();
+                    }
+                }
+                LoadDriverData(); // Обновляем данные
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка обновления статуса маршрута: {ex.Message}", "Ошибка",
+                              MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
-        {
-            LoadDriverData();
-        }
+        // Остальные методы остаются без изменений
     }
 }

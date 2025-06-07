@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Windows;
 
 namespace ATP
@@ -12,14 +13,8 @@ namespace ATP
             public string Name { get; set; }
             public string Role { get; set; }
             public int Id { get; set; }
+            public int? DriverId { get; set; } // Добавлено для связи с водителем
         }
-
-        private readonly User[] _users = new[]
-        {
-            new User { Id = 1, Username = "admin", Password = "admin123", Name = "Администратор", Role = "admin" },
-            new User { Id = 2, Username = "driver1", Password = "driver123", Name = "Иванов И.И.", Role = "driver" },
-            new User { Id = 3, Username = "driver2", Password = "driver456", Name = "Петров П.П.", Role = "driver" }
-        };
 
         public LoginWindow()
         {
@@ -37,24 +32,57 @@ namespace ATP
                 return;
             }
 
-            User foundUser = null;
-            foreach (var user in _users)
+            try
             {
-                if (user.Username == username && user.Password == password)
+                User foundUser = AuthenticateUser(username, password);
+
+                if (foundUser != null)
                 {
-                    foundUser = user;
-                    break;
+                    OpenAppropriateWindow(foundUser);
+                }
+                else
+                {
+                    StatusText.Text = "Неверный логин или пароль";
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при входе: {ex.Message}", "Ошибка",
+                              MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
-            if (foundUser != null)
+        private User AuthenticateUser(string username, string password)
+        {
+            using (SqlConnection connection = new SqlConnection(App.ConnectionString))
             {
-                OpenAppropriateWindow(foundUser);
+                connection.Open();
+                string query = @"SELECT u.Id, u.Username, u.Name, u.Role, u.DriverId 
+                               FROM Users u
+                               WHERE u.Username = @Username AND u.Password = @Password";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@Password", password); // В реальном приложении используйте хеширование
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new User
+                            {
+                                Id = reader.GetInt32(0),
+                                Username = reader.GetString(1),
+                                Name = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                                Role = reader.GetString(3),
+                                DriverId = reader.IsDBNull(4) ? (int?)null : reader.GetInt32(4)
+                            };
+                        }
+                    }
+                }
             }
-            else
-            {
-                StatusText.Text = "Неверный логин или пароль";
-            }
+            return null;
         }
 
         private void OpenAppropriateWindow(User user)
@@ -69,7 +97,16 @@ namespace ATP
                         nextWindow = new MainWindow();
                         break;
                     case "driver":
-                        nextWindow = new DriverWindow(user.Id);
+                        if (user.DriverId.HasValue)
+                        {
+                            nextWindow = new DriverWindow(user.DriverId.Value);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Для водителя не указан DriverId", "Ошибка",
+                                          MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
                         break;
                     default:
                         MessageBox.Show("Неизвестная роль пользователя", "Ошибка",

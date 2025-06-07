@@ -8,10 +8,8 @@ using System.Windows;
 
 namespace ATP
 {
-    /// <summary>
-    /// Логика взаимодействия для App.xaml
-    /// </summary>
     public partial class App : Application
     {
+        public static string ConnectionString { get; } = "Data Source=(local);Initial Catalog=ATP_Management;Integrated Security=True";
     }
 }

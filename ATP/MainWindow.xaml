@@ -124,15 +124,20 @@
 
         <!-- Заголовок -->
         <Border Grid.Row="0" Background="#FF4285F4" Padding="15">
-            <TextBlock Text="Информационная система АТП" 
-                       Foreground="White" 
-                       FontSize="18" 
-                       FontWeight="Bold"/>
+            <DockPanel>
+                <TextBlock Text="Информационная система АТП" 
+                   Foreground="White" 
+                   FontSize="18" 
+                   FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <Ellipse x:Name="DbStatusIndicator" Width="12" Height="12" Margin="0,0,10,0" 
+                     Fill="Gray" ToolTip="Статус подключения к БД"/>
+                    <Button Content="Выход" 
+                    Style="{StaticResource LogoutButtonStyle}"
+                    Click="LogoutButton_Click"/>
+                </StackPanel>
+            </DockPanel>
         </Border>
-        <Button Content="Выход" Grid.Row="0" HorizontalAlignment="Right" 
-            Style="{StaticResource LogoutButtonStyle}"
-            Click="LogoutButton_Click"/>
-
         <TabControl Grid.Row="1">
             <!-- Управление транспортом -->
             <TabItem Header="Управление транспортом">
@@ -534,6 +539,14 @@
                            Margin="10,0,0,0"
                            Foreground="#FF4285F4"/>
             </StatusBarItem>
+            <StatusBar>
+                <StatusBarItem>
+                    <TextBlock x:Name="StatusMessageText"/>
+                </StatusBarItem>
+                <StatusBarItem HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding CurrentDateTime, StringFormat='dd.MM.yyyy HH:mm'}"/>
+                </StatusBarItem>
+            </StatusBar>
         </StatusBar>
     </Grid>
 </Window>

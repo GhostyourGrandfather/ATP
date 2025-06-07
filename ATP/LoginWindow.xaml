@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ATP"
     mc:Ignorable="d"
         Title="Авторизация - Информационная система АТП" 
-        Height="400" Width="400"
+        Height="800" Width="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="#FFF0F0F0">
@@ -44,7 +44,15 @@
             <TextBox x:Name="UsernameTextBox" />
 
             <Label Content="Пароль:"/>
-            <PasswordBox x:Name="PasswordBox" Margin="0,5,0,15" Padding="5" FontSize="14"/>
+            <Grid Margin="0,5,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <PasswordBox x:Name="PasswordBox" Grid.Column="0" Padding="5" FontSize="14"/>
+                <Button Grid.Column="1" Content="👁" Padding="5,0" Margin="5,0,0,0" 
+                    Click="TogglePasswordVisibility_Click"/>
+            </Grid>
 
             <CheckBox x:Name="RememberCheckBox" Content="Запомнить меня" Margin="0,5,0,0"/>
 
@@ -54,6 +62,14 @@
 
             <TextBlock x:Name="StatusText" Foreground="Red" Margin="0,15,0,0" 
                        TextWrapping="Wrap" HorizontalAlignment="Center"/>
+            <StatusBar>
+                <StatusBarItem>
+                    <TextBlock x:Name="StatusMessageText"/>
+                </StatusBarItem>
+                <StatusBarItem HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding CurrentDateTime, StringFormat='dd.MM.yyyy HH:mm'}"/>
+                </StatusBarItem>
+            </StatusBar>
         </StackPanel>
     </Grid>
 </Window>
