@@ -16,7 +16,7 @@ namespace ATP
 
         private readonly User[] _users = new[]
         {
-            new User { Id = 1, Username = "admin", Password = "admin123", Name = "Администратор", Role = "admin" },
+            new User { Id = 1, Username = "a", Password = "a", Name = "Администратор", Role = "admin" },
             new User { Id = 2, Username = "driver1", Password = "driver123", Name = "Иванов И.И.", Role = "driver" },
             new User { Id = 3, Username = "driver2", Password = "driver456", Name = "Петров П.П.", Role = "driver" }
         };
